@@ -13,8 +13,8 @@
         </style>
         <script>
             function goToLobby(){
-                let username = $('#nameInput').val();
-                window.location.href = "lobby.html?username=" +username;
+                let username = encodeURI($('#nameInput').val());
+                window.location.href = "lobby.html?username="+username;
             }
         </script>
         <title>Reversi</title>
