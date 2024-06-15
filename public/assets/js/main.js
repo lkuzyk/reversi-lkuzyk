@@ -258,6 +258,7 @@ let old_board = [
 let my_color = "";
 
 socket.on('game_update', (payload) => {
+    console.log(1, payload)
     if (( typeof payload == 'undefined') || (payload === null)) {
         console.log('Server did not send a payload');
         return;
@@ -285,16 +286,39 @@ socket.on('game_update', (payload) => {
         return;
     }
 
-    $("#my_color").html('<h3 id="my_color">I am '+my_color+ '</h3>');
+   
+    if (my_color === 'white') {
+        $("#my_color").html('<h3 id="my_color">I am a cat</h3>');
+    }
+    else if (my_color === 'black') {
+        $("#my_color").html('<h3 id="my_color">I am a dog</h3>');
+    }
+    else {
+        $("#my_color").html('<h3 id="my_color">Error: I don\'t know what I am</h3>');
+    }
 
+    if (payload.game.whose_turn === 'white') {
+        $("#my_color").append('<h4>It is cat\'s turn.</h4>');
+    }
+    else if (payload.game.whose_turn === 'black') {
+        $("#my_color").html('<h4>It is dog\'s turn.</h4>');
+    }
+    else {
+        $("#my_color").html('<h4>I don\'t know whose turn it is.</h4>');
+    }
 
     let whitesum = 0;
     let blacksum = 0;
-    
+
     /* Animate changes to the board */
     for (let row = 0; row < 8; row++) {
         for (let column = 0; column < 8; column++) {
-            console.log(`Checking (${row}, ${column}): old_board=${old_board[row][column]}, board=${board[row][column]}`);
+            if (board[row][column] === 'w') {
+                whitesum++;
+            }
+            else if (board[row][column] === 'b') {
+                blacksum++;
+            }
 
             /* Check to see if the server changed any space on the board */
             if (old_board[row][column] !== board[row][column]) {
@@ -372,6 +396,9 @@ socket.on('game_update', (payload) => {
             }
         }
     }
+    $("#whitesum").html(whitesum);
+    $("#blacksum").html(blacksum);
+
     old_board = board;
 })
 
@@ -383,11 +410,12 @@ socket.on('play_token_response', (payload) => {
     }
     if(payload.result === 'fail') {
         console.log(payload.message);
+        alert(payload.message);
         return;
     }
 })
 
-socket.on('game_over_response', (payload) => {
+socket.on('game_over', (payload) => {
     if ((typeof payload == 'undefined') || (payload === null)) {
         console.log('Server did not send a payload');
         return;
@@ -419,6 +447,8 @@ $( () => {
     socket.emit('join_room',request);
 
     $("#lobbyTitle").html(username+"'s Lobby");
+
+    $("#quit").html("<a href='lobby.html?username=" +username+ "'class='btn btn-danger' role='button'>Quit</a>");
 
     $('#chatMessage').keypress(function (e) {
         let key = e.which;
